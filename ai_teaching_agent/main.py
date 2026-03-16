@@ -5,13 +5,13 @@ import json
 import os
 import re
 from pathlib import Path
-from typing import Any, Optional, TypedDict
+from typing import Any, TypedDict
 
+from bindu.penguin.bindufy import bindufy
+from dotenv import load_dotenv
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_openai import ChatOpenAI
 from langgraph.graph import END, StateGraph
-from bindu.penguin.bindufy import bindufy
-from dotenv import load_dotenv
 
 load_dotenv()
 
@@ -54,7 +54,7 @@ class CourseState(TypedDict):
 
 # Singleton instances for persistent server state
 graph: Any = None
-global_llm: Optional[ChatOpenAI] = None
+global_llm: ChatOpenAI | None = None
 _initialized = False
 _init_lock = asyncio.Lock()
 
@@ -73,7 +73,7 @@ async def professor_node(state: CourseState) -> dict[str, str]:
         HumanMessage(content=f"Topic: {state['topic']}"),
     ]
     if global_llm is None:
-        raise RuntimeError("LLM not initialized")
+        raise RuntimeError("LLM not initialized")  # noqa: TRY003
     response = await global_llm.ainvoke(messages)
     return {"professor_content": str(response.content)}
 
@@ -101,7 +101,7 @@ async def parallel_team_node(state: CourseState) -> dict[str, str]:
     ctx = f"Context:\n{kb_content}"
 
     if global_llm is None:
-        raise RuntimeError("LLM not initialized")
+        raise RuntimeError("LLM not initialized")  # noqa: TRY003
 
     # Initialize concurrent LLM requests
     tasks = [
@@ -116,7 +116,7 @@ async def parallel_team_node(state: CourseState) -> dict[str, str]:
     def extract(res: Any) -> str:
         """Safely parses results from the gather pool."""
         if isinstance(res, Exception):
-            return f"⚠️ Error: {str(res)}"
+            return f"⚠️ Error: {res!s}"
         return str(res.content)
 
     return {
@@ -129,19 +129,19 @@ async def parallel_team_node(state: CourseState) -> dict[str, str]:
 async def compiler_node(state: CourseState) -> dict[str, str]:
     """Aggregate individual agent outputs into a unified Markdown curriculum."""
     print("✨ Compiler: Polishing Final Curriculum...")
-    final_md = f"""# 🎓 AI Teaching Team: {state['topic']}
+    final_md = f"""# 🎓 AI Teaching Team: {state["topic"]}
 ---
 ## 🧠 Knowledge Base
-{state.get('professor_content', '')}
+{state.get("professor_content", "")}
 ---
 ## 🗺️ Learning Roadmap
-{state.get('advisor_roadmap', '')}
+{state.get("advisor_roadmap", "")}
 ---
 ## 📚 Resource Library
-{state.get('librarian_resources', '')}
+{state.get("librarian_resources", "")}
 ---
 ## ✍️ Practice Workbook
-{state.get('ta_workbook', '')}
+{state.get("ta_workbook", "")}
 """
     return {"final_output": final_md}
 
@@ -157,18 +157,20 @@ async def initialize_agent() -> None:
 
     api_key = os.getenv("OPENROUTER_API_KEY")
     if not api_key:
-        raise RuntimeError("Missing OPENROUTER_API_KEY")
+        raise RuntimeError("Missing OPENROUTER_API_KEY")  # noqa: TRY003
 
-    global_llm = ChatOpenAI(  # type: ignore
-        openai_api_base="https://openrouter.ai/api/v1",
-        openai_api_key=api_key,
-        model=os.getenv("MODEL_NAME", "anthropic/claude-3-haiku"),
-        max_retries=3,
-        timeout=60,
-    )
+    # Use dictionary unpacking to bypass strict static type checks on kwargs
+    llm_kwargs: dict[str, Any] = {
+        "base_url": "https://openrouter.ai/api/v1",
+        "api_key": api_key,
+        "model": os.getenv("MODEL_NAME", "anthropic/claude-3-haiku"),
+        "max_retries": 3,
+        "timeout": 60,
+    }
+    global_llm = ChatOpenAI(**llm_kwargs)
 
     # Define Graph Topology
-    workflow = StateGraph(CourseState)  # type: ignore
+    workflow = StateGraph(CourseState)  # type: ignore[invalid-argument-type]
     workflow.add_node("professor", professor_node)
     workflow.add_node("parallel_team", parallel_team_node)
     workflow.add_node("compiler", compiler_node)
@@ -197,7 +199,7 @@ async def run_agent(messages: list[dict[str, str]]) -> Any:
         result = await graph.ainvoke({"topic": user_topic})
         return result.get("final_output", "Error: No output generated.")
     except Exception as e:
-        return f"Error: {str(e)}"
+        return f"Error: {e!s}"
 
 
 async def handler(messages: list[dict[str, str]]) -> Any:

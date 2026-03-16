@@ -7,8 +7,7 @@
 #
 #  Thank you users! We ❤️ you! - 🌻
 
-"""ai-teaching-agent - An Bindu Agent.
-"""
+"""ai-teaching-agent - An Bindu Agent."""
 
 from ai_teaching_agent.__version__ import __version__
 from ai_teaching_agent.main import (
