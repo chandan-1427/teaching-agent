@@ -67,7 +67,14 @@ async def test_parallel_team_exception_handling(mock_llm_response):
     Tests the gather(return_exceptions=True) logic.
     Ensures one node failing doesn't crash the entire request.
     """
-    state: CourseState = {"professor_content": "Knowledge base summary", "topic": "Test"}
+    state: CourseState = {
+        "professor_content": "Knowledge base summary", 
+        "topic": "Test",
+        "advisor_roadmap": "",
+        "librarian_resources": "",
+        "ta_workbook": "",
+        "final_output": ""
+    }
     
     # Simulate: 1 success, 1 failure, 1 success
     side_effects = [
@@ -126,11 +133,8 @@ async def test_missing_api_key_runtime_error():
     """
     Ensures system fails fast if the API key is missing.
     """
-    with patch("os.getenv", return_value=None), \
-         patch("ai_teaching_agent.main._init_lock"):
-        
-        with pytest.raises(RuntimeError, match="OPENROUTER_API_KEY not found"):
-            await initialize_agent()
+    with patch("os.getenv", return_value=None), patch("ai_teaching_agent.main._init_lock"), pytest.raises(RuntimeError, match="Missing OPENROUTER_API_KEY"):
+        await initialize_agent()
             
 @pytest.mark.asyncio
 async def test_handler_llm_timeout_resilience():
@@ -159,12 +163,13 @@ async def test_compiler_handles_malformed_input():
     from ai_teaching_agent.main import compiler_node
     
     # State with missing keys or empty strings
-    state = {
+    state: CourseState = {
         "topic": "Empty Test",
         "professor_content": "",
         "advisor_roadmap": "N/A",
         "librarian_resources": "",
-        "ta_workbook": "None"
+        "ta_workbook": "None",
+        "final_output": ""
     }
     
     result = await compiler_node(state)
@@ -173,4 +178,3 @@ async def test_compiler_handles_malformed_input():
     # Compiler should still produce the headers even if content is missing
     assert "# 🎓 AI Teaching Team: Empty Test" in output
     assert "## 🧠 Knowledge Base" in output
-    
