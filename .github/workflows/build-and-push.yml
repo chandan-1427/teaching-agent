@@ -29,7 +29,7 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: chandan
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Read version
@@ -46,12 +46,12 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64
           tags: |
-            chandan/ai-teaching-agent:latest
-            chandan/ai-teaching-agent:${{ steps.version.outputs.version }}
-            chandan/ai-teaching-agent:build-${{ github.run_number }}
-            chandan/ai-teaching-agent:${{ github.sha }}
-          cache-from: type=registry,ref=chandan/ai-teaching-agent:buildcache
-          cache-to: type=registry,ref=chandan/ai-teaching-agent:buildcache,mode=max
+            ${{ secrets.DOCKERHUB_USERNAME }}/ai-teaching-agent:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/ai-teaching-agent:${{ steps.version.outputs.version }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/ai-teaching-agent:build-${{ github.run_number }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/ai-teaching-agent:${{ github.sha }}
+          cache-from: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/ai-teaching-agent:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKERHUB_USERNAME }}/ai-teaching-agent:buildcache,mode=max
 
       - name: Read agent config
         id: agent_config
@@ -91,7 +91,7 @@ jobs:
             "execution_cost": ${{ toJson(fromJson(steps.agent_config.outputs.config).execution_cost || fromJson('{}')) }},
             "deployment": {
               "url": "${{ fromJson(steps.agent_config.outputs.config).deployment.url }}",
-              "docker_image": "chandan/ai-teaching-agent:latest",
+              "docker_image": "${{ secrets.DOCKERHUB_USERNAME }}/ai-teaching-agent:latest",
               "docker_digest": "${{ steps.docker_build.outputs.digest }}",
               "platforms": ["linux/amd64", "linux/arm64"]
             },
