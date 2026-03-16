@@ -7,7 +7,7 @@ import re
 from pathlib import Path
 from typing import Any, TypedDict
 
-from bindu.penguin.bindufy import bindufy # type: ignore
+from bindu.penguin.bindufy import bindufy  # type: ignore[import-untyped]
 from dotenv import load_dotenv
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_openai import ChatOpenAI
