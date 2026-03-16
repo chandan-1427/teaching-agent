@@ -1,0 +1,36 @@
+{
+  "author": "chandandakka481@gmail.com",
+  "name": "ai-teaching-agent",
+  "description": "An intelligent Bindu AI agent designed to tutor and assist users in learning new concepts.",
+  "version": "1.0.0",
+  "recreate_keys": false,
+  "skills": [],
+  "capabilities": {},
+  "agent_trust": "low",
+  "debug_mode": true,
+  "debug_level": 2,
+  "deployment": {
+    "url": "http://0.0.0.0:3773",
+    "expose": true,
+    "protocol_version": "1.0.0",
+    "proxy_urls": [
+      "0.0.0.0"
+    ],
+    "cors_origins": [
+      "*"
+    ]
+  },
+  "num_history_sessions": 5,
+  "environment_variables": [
+    {
+      "key": "OPENROUTER_API_KEY",
+      "description": "OpenRouter API key for LLM calls",
+      "required": true
+    },
+    {
+      "key": "MODEL_NAME",
+      "description": "The target LLM model to use",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+site_name: ai-teaching-agent
+repo_url: https://github.com/chandan-1427/ai-teaching-agent
+site_url: https://chandan-1427.github.io/ai-teaching-agent
+site_description: An intelligent Bindu AI agent designed to tutor and assist users in learning new concepts.
+site_author: rahul
+edit_uri: edit/main/docs/
+repo_name: chandan-1427/ai-teaching-agent
+copyright: Maintained by <a href="https://chandan-1427.com">chandan-1427</a>.
+
+nav:
+  - Home: index.md
+  - Modules: modules.md
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: ["src/ai_teaching_agent"]
+theme:
+  name: material
+  feature:
+    tabs: true
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: white
+      accent: deep orange
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: black
+      accent: deep orange
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  icon:
+    repo: fontawesome/brands/github
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/chandan-1427/ai-teaching-agent
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/ai-teaching-agent
+
+markdown_extensions:
+  - toc:
+      permalink: true
+  - pymdownx.arithmatex:
+      generic: true
